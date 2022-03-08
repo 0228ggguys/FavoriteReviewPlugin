@@ -1,0 +1,9 @@
+{
+    "name": "ec-cube/FavoriteReview",
+    "version": "7.4.27",
+    "description": "お気に入りレビューを投稿するためのプラグイン",
+    "type": "eccube-plugin",
+    "extra": {
+        "code": "FavoriteReview"
+    }
+}

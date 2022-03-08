@@ -1,0 +1,97 @@
+{% extends 'default_frame.twig' %}
+
+{% set mypageno = 'favorite_share' %}
+
+{# {% set body_class = 'mypage' %} #}
+
+{% block main %}
+
+<style>
+.star-display{
+  display: flex;
+}
+.star-on {
+  position: relative;
+  padding: 0 4px;
+  color: #f00;
+  font-size: 20px;
+}
+.star-off {
+  position: relative;
+  padding: 0 4px;
+  color: #ccc;
+  font-size: 20px;
+}
+.fab{
+    margin: 0 10px 20px 10px;
+}
+</style>
+
+<link href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" rel="stylesheet">
+
+
+    <div class="ec-layoutRole__main">
+        <div class="ec-mypageRole">
+            <div class="ec-pageHeader">
+                <h1>{{ Customer.name01 }}{{ Customer.name02 }}さんのお気に入り一覧</h1>
+            </div>
+            {# {% include 'Mypage/navi.twig' %} #}
+        </div>
+        <div class="ec-mypageRole">
+            <div class="ec-favoriteRole">
+                {% if pagination.totalItemCount > 0 %}
+                    <div class="ec-favoriteRole__header">
+                        <p>{{ 'front.mypage.favorite_count'|trans({'%count%':pagination.totalItemCount}) }}</p>
+                    </div>
+                    <div class="ec-favoriteRole__detail">
+                        <ul class="ec-favoriteRole__itemList">
+                            {% for FavoriteProduct in pagination %}
+                                {% set Product = FavoriteProduct.Product %}
+                                <li class="ec-favoriteRole__item">
+                                    <a class="ec-favoriteRole__itemThumb" href="{{ url('product_detail', {'id': Product.id}) }}">
+                                        <p class="ec-favoriteRole__item-image">
+                                            <img src="{{ asset(Product.main_list_image|no_image_product, 'save_image') }}">
+                                        </p>
+                                    </a>
+                                    <p class="ec-favoriteRole__itemTitle">{{ Product.name }}</p>
+                                    <p class="ec-favoriteRole__itemPrice">
+                                        {% if Product.price02_inc_tax_min == Product.price02_inc_tax_max %}
+                                            {{ Product.price02_inc_tax_min|price }}
+                                        {% else %}
+                                            {{ Product.price02_inc_tax_min|price }}～{{ Product.price02_inc_tax_max|price }}
+                                        {% endif %}
+                                    </p>
+                                    <p>{{ FavoriteProduct.comment }}</p>
+                                    <div class="star-display">
+                                        {% for i in range(1,4) %}
+                                            {% if i <= FavoriteProduct.priority %} <div class="star-on">★</div>
+                                            {% else %} <div class="star-off">★</div>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="ec-pagerRole">
+                        {% include "pager.twig" with {'pages': pagination.paginationData} %}
+                    </div>
+                {% else %}
+                    <div class="ec-favoriteRole__header">{{ 'front.mypage.favorite_not_found'|trans }}</div>
+                {% endif %}
+
+                {# ログインしていれば別ユーザーの画面でもみれてしまう。 #}
+                {% if is_granted('ROLE_USER') %}
+                    <a href="{{twitter_share_url}}"><i class="fab fa-twitter fa-4x"></i></a>
+                    <a href="{{facebook_share_url}}"><i class="fab fa-facebook fa-4x"></i></a>
+                {% endif %}
+                <div class="ec-off4Grid">
+                    <div class="ec-off4Grid__cell"><a class="ec-blockBtn--cancel" href="{{ url('mypage_favorite') }}">サイトへ戻る</a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}

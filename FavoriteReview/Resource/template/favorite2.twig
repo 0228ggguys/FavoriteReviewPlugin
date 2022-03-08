@@ -1,0 +1,45 @@
+{% extends 'default_frame.twig' %}
+
+{% set mypageno = 'favorite2' %}
+
+{% set body_class = 'mypage' %}
+
+{% block main %}
+
+{% block stylesheet %}
+<style>
+.review-form-wrapper{
+    margin: 0 5%;
+}
+.comment-delete-button{
+  margin:10px 0;
+}
+.comment-delete-button a{
+  font-size: 14px;
+  padding: 2px;
+  border: solid 1px #f00;
+  border-radius:2px;
+  background-color: #f99;
+}
+</style>
+{% endblock %}
+
+<div class="ec-mypageRole">
+    <div class="ec-pageHeader">
+        <h1>コメントの編集</h1>
+    </div>
+    {% include 'Mypage/navi.twig' %}
+</div>
+<div class="review-form-wrapper">
+{# {{ dump() }} #}
+    {{ form_start(form) }}
+    {{ form_widget(form) }}
+    {# {{ form_widget(form.comment, { 'attr': { 'placeholder': 'common.comment' }}) }}
+    {{form_widget(form.priority)}} #}
+    <input type="submit" action="{{ url('mypage_favorite_update', { id : id }) }}" method="POST">
+    {{ form_end(form) }}
+    <div class="comment-delete-button">
+    <a href="{{ url('mypage_favorite_complete', {id : id}) }}">評価を削除</a>
+    </div>
+</div>
+{% endblock %}

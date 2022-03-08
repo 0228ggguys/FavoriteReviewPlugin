@@ -1,0 +1,35 @@
+{% extends 'default_frame.twig' %}
+
+{% set mypageno = 'favorite3' %}
+
+{% set body_class = 'mypage' %}
+
+{% block main %}
+
+<div class="ec-mypageRole">
+    <div class="ec-pageHeader">
+        <h1>コメントの編集</h1>
+    </div>
+    {% include 'Mypage/navi.twig' %}
+</div>
+
+
+{# コメントを変更しました！
+<a href="{{ url('mypage_favorite') }}">お気に入り一覧に戻る</a> #}
+
+<div class="ec-registerCompleteRole">
+            <div class="ec-off2Grid ec-text-ac">
+                <div class="ec-off2Grid__cell">
+                    <div class="ec-reportHeading">
+                        <h2>コメントの変更が完了しました</h2>
+                    </div>
+                    <p class="ec-reportDescription">{{ 'front.mypage.customer_complete_message__body'|trans }}</p>
+                    <div class="ec-off4Grid">
+                        <div class="ec-off4Grid__cell"><a class="ec-blockBtn--cancel" href="{{ url('mypage_favorite') }}">{{ 'common.back'|trans }}</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+{% endblock %}
