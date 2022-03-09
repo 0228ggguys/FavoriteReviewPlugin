@@ -1,6 +1,7 @@
 <?php
 
 // もとはmypageControllerに追記していたものです。
+// commitできるか確認用のコメント
 
 /*
  * This file is part of EC-CUBE
