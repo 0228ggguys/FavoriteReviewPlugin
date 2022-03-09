@@ -53,8 +53,8 @@ class FavoriteReviewController extends AbstractController
      * @var ProductRepository
      */
     protected $productRepository;
+  
     /**
-     *
      * @var FavoriteReviewRepository
      */
     protected $favoriteReviewRepository;
