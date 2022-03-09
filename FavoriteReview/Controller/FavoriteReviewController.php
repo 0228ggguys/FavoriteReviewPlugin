@@ -2,6 +2,7 @@
 
 // もとはmypageControllerに追記していたものです。
 // commitできるか確認用のコメント
+// ブランチを切れるかの確認用コメント
 
 /*
  * This file is part of EC-CUBE
