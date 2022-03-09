@@ -53,8 +53,8 @@ class FavoriteReviewController extends AbstractController
      * @var ProductRepository
      */
     protected $productRepository;
+  
     /**
-     * 
      * @var FavoriteReviewRepository
      */
     protected $favoriteReviewRepository;
@@ -120,6 +120,47 @@ class FavoriteReviewController extends AbstractController
         $this->cartService = $cartService;
         $this->purchaseFlow = $purchaseFlow;
     }
+
+    /**
+     * お気に入り商品を表示する.
+     *
+     * @Route("/mypage/favorite", name="mypage_favorite", methods={"GET"})
+     * @Template("FavoriteReview/Resource/template/Mypage/favorite.twig")
+     */
+    public function favorite(Request $request, PaginatorInterface $paginator)
+    {
+        if (!$this->BaseInfo->isOptionFavoriteProduct()) {
+            throw new NotFoundHttpException();
+        }
+        $Customer = $this->getUser();
+
+
+        // paginator
+        $qb = $this->customerFavoriteProductRepository->getQueryBuilderByCustomer($Customer);
+
+        $event = new EventArgs(
+            [
+                'qb' => $qb,
+                'Customer' => $Customer,
+            ],
+            $request
+        );
+        $this->eventDispatcher->dispatch(EccubeEvents::FRONT_MYPAGE_MYPAGE_FAVORITE_SEARCH, $event);
+
+        $pagination = $paginator->paginate(
+            $qb,
+            $request->get('pageno', 1),
+            $this->eccubeConfig['eccube_search_pmax'],
+            ['wrap-queries' => true]
+        );
+// dump($pagination);
+// exit;
+            return [
+                'pagination' => $pagination,
+                'Customer' => $Customer
+            ];
+
+        }
 
 
 
