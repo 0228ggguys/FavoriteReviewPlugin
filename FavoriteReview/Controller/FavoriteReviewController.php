@@ -29,6 +29,7 @@ use Eccube\Repository\CustomerFavoriteProductRepository;
 use Eccube\Repository\OrderRepository;
 use Eccube\Repository\ProductRepository;
 use Eccube\Repository\CustomerRepository;
+use Plugin\FavoriteReview\Repository\FavoriteReviewRepository;
 use Eccube\Service\CartService;
 use Eccube\Service\PurchaseFlow\PurchaseContext;
 use Eccube\Service\PurchaseFlow\PurchaseFlow;
@@ -52,6 +53,11 @@ class FavoriteReviewController extends AbstractController
      * @var ProductRepository
      */
     protected $productRepository;
+    /**
+     *
+     * @var FavoriteReviewRepository
+     */
+    protected $favoriteReviewRepository;
 
     /**
      * @var CustomerRepository
@@ -88,6 +94,7 @@ class FavoriteReviewController extends AbstractController
      *
      * @param OrderRepository $orderRepository
      * @param CustomerRepository $customerRepository
+     * @param FavoriteReviewRepository $favoriteReviewRepository
      * @param ProductRepository $productRepository
      * @param CustomerFavoriteProductRepository $customerFavoriteProductRepository
      * @param CartService $cartService
@@ -98,6 +105,7 @@ class FavoriteReviewController extends AbstractController
         OrderRepository $orderRepository,
         CustomerRepository $customerRepository,
         ProductRepository $productRepository,
+        FavoriteReviewRepository $favoriteReviewRepository,
         CustomerFavoriteProductRepository $customerFavoriteProductRepository,
         CartService $cartService,
         BaseInfoRepository $baseInfoRepository,
@@ -106,11 +114,53 @@ class FavoriteReviewController extends AbstractController
         $this->orderRepository = $orderRepository;
         $this->customerRepository = $customerRepository;
         $this->productRepository = $productRepository;
+        $this->favoriteReviewRepository = $favoriteReviewRepository;
         $this->customerFavoriteProductRepository = $customerFavoriteProductRepository;
         $this->BaseInfo = $baseInfoRepository->get();
         $this->cartService = $cartService;
         $this->purchaseFlow = $purchaseFlow;
     }
+
+    /**
+     * お気に入り商品を表示する.
+     *
+     * @Route("/mypage/favorite", name="mypage_favorite", methods={"GET"})
+     * @Template("FavoriteReview/Resource/template/Mypage/favorite.twig")
+     */
+    public function favorite(Request $request, PaginatorInterface $paginator)
+    {
+        if (!$this->BaseInfo->isOptionFavoriteProduct()) {
+            throw new NotFoundHttpException();
+        }
+        $Customer = $this->getUser();
+
+
+        // paginator
+        $qb = $this->customerFavoriteProductRepository->getQueryBuilderByCustomer($Customer);
+
+        $event = new EventArgs(
+            [
+                'qb' => $qb,
+                'Customer' => $Customer,
+            ],
+            $request
+        );
+        $this->eventDispatcher->dispatch(EccubeEvents::FRONT_MYPAGE_MYPAGE_FAVORITE_SEARCH, $event);
+
+        $pagination = $paginator->paginate(
+            $qb,
+            $request->get('pageno', 1),
+            $this->eccubeConfig['eccube_search_pmax'],
+            ['wrap-queries' => true]
+        );
+// dump($pagination);
+// exit;
+            return [
+                'pagination' => $pagination,
+                'Customer' => $Customer
+            ];
+
+        }
 
 
 
