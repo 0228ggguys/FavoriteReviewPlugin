@@ -1,8 +1,6 @@
 <?php
 
 // もとはmypageControllerに追記していたものです。
-// commitできるか確認用のコメント
-// ブランチを切れるかの確認用コメント
 
 /*
  * This file is part of EC-CUBE
@@ -120,7 +118,7 @@ class FavoriteReviewController extends AbstractController
      * お気に入り商品のコメントを編集する.
      *
      * @Route("/mypage/favorite/{id}/update", name="mypage_favorite_update", methods={"GET","POST"},requirements={"id" = "\d+"})
-     * @Template("Mypage/favorite2.twig")
+     * @Template("FavoriteReview/Resource/template/Mypage/favorite2.twig")
      */
     public function update(Request $request, $id)
     {
@@ -176,7 +174,7 @@ class FavoriteReviewController extends AbstractController
                 $em->flush();
             }
 
-            return $this->render('Mypage/favorite3.twig', [
+            return $this->render('FavoriteReview/Resource/template/Mypage/favorite3.twig', [
             ]);
         }
 
@@ -190,7 +188,7 @@ class FavoriteReviewController extends AbstractController
      * お気に入り商品のコメントの編集を完了する.
      *
      * @Route("/mypage/favorite/{id}/complete", name="mypage_favorite_complete", methods={"GET","POST"},requirements={"id" = "\d+"})
-     * @Template("Mypage/favorite3.twig")
+     * @Template("FavoriteReview/Resource/template/Mypage/favorite3.twig")
      */
     public function complete(Request $request, $id)
     {
@@ -243,7 +241,7 @@ class FavoriteReviewController extends AbstractController
          * お気に入り商品をシェアする.
          *
          * @Route("/favorite_share/{user_id}", name="favorite_share", methods={"GET"})
-         * @Template("Mypage/favorite_share.twig")
+         * @Template("FavoriteReview/Resource/template/Mypage/favorite_share.twig")
          */
         public function favoriteShare(Request $request, PaginatorInterface $paginator, $user_id)
         {
