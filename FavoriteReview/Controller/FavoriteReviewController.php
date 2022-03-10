@@ -53,8 +53,8 @@ class FavoriteReviewController extends AbstractController
      * @var ProductRepository
      */
     protected $productRepository;
-  
     /**
+     *
      * @var FavoriteReviewRepository
      */
     protected $favoriteReviewRepository;
@@ -134,7 +134,6 @@ class FavoriteReviewController extends AbstractController
         }
         $Customer = $this->getUser();
 
-
         // paginator
         $qb = $this->customerFavoriteProductRepository->getQueryBuilderByCustomer($Customer);
 
@@ -170,7 +169,7 @@ class FavoriteReviewController extends AbstractController
      * @Route("/mypage/favorite/{id}/update", name="mypage_favorite_update", methods={"GET","POST"},requirements={"id" = "\d+"})
      * @Template("FavoriteReview/Resource/template/Mypage/favorite2.twig")
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, PaginatorInterface $paginator, $id)
     {
         $form = $this->createFormBuilder()
                 ->add('comment',TextType::class,[
@@ -191,13 +190,39 @@ class FavoriteReviewController extends AbstractController
 
         //編集中
         // $fp = $this->customerFavoriteProductRepository->find($id)->getProduct();
-        // dump($fp);
+        // dump($fp);,
         // exit;
 
         // $fpName = $fp->getName();
         // $fpImage = $fp->getImage();
         // $favoriteProduct = $this->productRepository->getProduct();
         // $favoriteProduct= $this->customerFavoriteProductRepository->find($id);
+
+        $Customer = $this->getUser();
+
+        // paginator
+        $qb = $this->favoriteReviewRepository->getQueryBuilderByReviewId($Customer, $id);
+
+        $event = new EventArgs(
+            [
+                'qb' => $qb,
+                'Customer' => $Customer,
+            ],
+            $request
+        );
+        $this->eventDispatcher->dispatch(EccubeEvents::FRONT_MYPAGE_MYPAGE_FAVORITE_SEARCH, $event);
+
+        $pagination = $paginator->paginate(
+            $qb,
+            $request->get('pageno', 1),
+            $this->eccubeConfig['eccube_search_pmax'],
+            ['wrap-queries' => true]
+        );
+// dump($pagination);
+// exit;
+
+
+
 
 
 
@@ -231,6 +256,7 @@ class FavoriteReviewController extends AbstractController
             return [
                 'form' => $form->createView(),
                 'id' => $id,
+                'pagination' => $pagination
             ];
     }
 
