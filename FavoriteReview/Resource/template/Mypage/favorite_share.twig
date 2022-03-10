@@ -37,6 +37,11 @@
             </div>
             {# {% include 'Mypage/navi.twig' %} #}
         </div>
+                {{ form_start(form) }}
+                {{ form_widget(form) }}
+                <input type="submit" action="{{ url('favorite_share', { user_id : Customer.id }) }}" method="POST">
+
+                {{ form_end(form) }}
         <div class="ec-mypageRole">
             <div class="ec-favoriteRole">
                 {% if pagination.totalItemCount > 0 %}
@@ -80,6 +85,8 @@
                 {% else %}
                     <div class="ec-favoriteRole__header">{{ 'front.mypage.favorite_not_found'|trans }}</div>
                 {% endif %}
+
+
 
                 {# ログインしていれば別ユーザーの画面でもみれてしまう。 #}
                 {% if is_granted('ROLE_USER') %}
