@@ -152,7 +152,8 @@ class FavoriteReviewController extends AbstractController
             $this->eccubeConfig['eccube_search_pmax'],
             ['wrap-queries' => true]
         );
-
+// dump($pagination);
+// exit;
             return [
                 'pagination' => $pagination,
                 'Customer' => $Customer
@@ -299,7 +300,7 @@ class FavoriteReviewController extends AbstractController
      /**
          * お気に入り商品をシェアする.
          *
-         * @Route("/favorite_share/{user_id}", name="favorite_share", methods={"GET"})
+         * @Route("/favorite_share/{user_id}", name="favorite_share", methods={"GET","POST"})
          * @Template("FavoriteReview/Resource/template/Mypage/favorite_share.twig")
          */
         public function favoriteShare(Request $request, PaginatorInterface $paginator, $user_id)
@@ -307,8 +308,10 @@ class FavoriteReviewController extends AbstractController
             if (!$this->BaseInfo->isOptionFavoriteProduct()) {
                 throw new NotFoundHttpException();
             }
-            // $Customer = $this->getUser();
+
             $Customer = $this->customerRepository->find($user_id);
+            // dump($Customer);
+            // exit;
 
             // paginator
             $qb = $this->customerFavoriteProductRepository->getQueryBuilderByCustomer($Customer);
@@ -329,15 +332,57 @@ class FavoriteReviewController extends AbstractController
                 ['wrap-queries' => true]
             );
 
+            $share = $this->customerRepository->find($user_id)->getShare();
+
+            $form = $this->createFormBuilder()
+                ->add('share',ChoiceType::class,[
+                    'data' => $share,
+                    'choices' => [
+                    '公開' => true,
+                    '非公開' => false
+                    ]
+                ])
+                ->getForm();
+
+                if($request->getMethod() == "POST"){
+
+
+                    $form->handleRequest($request);
+                    $c = $this->customerRepository->find($user_id);
+                    // $CustomerFavoriteProduct = $this->customerFavoriteProductRepository->find($id);
+                    $c->setShare($form->get('share')->getData());
+
+                    if($form->isSubmitted() && $form->isValid()){
+
+                        $em = $this->getDoctrine()->getManager();
+                        $em->persist($c);
+                        $em->flush();
+                    }
+
+                }
+
             $twitter_share_url = 'https://twitter.com/intent/tweet?url=http://localhost:8091/favorite_share/'.$user_id.'&text=お気に入りリストです！';
             $facebook_share_url = 'https://www.facebook.com/sharer.php?src=bm&u=http://localhost:8091/favorite_share/'.$user_id.'&t=お気に入りリストです！';
 
-            return [
-                'pagination' => $pagination,
-                'twitter_share_url' => $twitter_share_url,
-                'facebook_share_url' => $facebook_share_url,
-                'Customer' => $Customer
-            ];
+            // 「非公開ページ　かつ　外部ユーザーのアクセス」をはじく
+            $user = $this->getUser();
+            $customer2 = $this->customerRepository->find($user_id);
+            if($customer2->getShare() == 0 && $user->getId() != $user_id)
+            {
+                return $this->render('FavoriteReview/Resource/template/Mypage/share_error.twig', [
+                ]);
+            }
+
+
+                return [
+                    'pagination' => $pagination,
+                    'twitter_share_url' => $twitter_share_url,
+                    'facebook_share_url' => $facebook_share_url,
+                    'Customer' => $Customer,
+                    'user_id' => $user_id,
+                    'form' => $form->createView()
+                ];
+
 
             }
-}
+        }
