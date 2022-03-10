@@ -3,6 +3,8 @@
 
 {% set mypageno = 'favorite2' %}
 
+{% form_theme form 'Form/form_div_layout.twig' %}
+
 {% set body_class = 'mypage' %}
 
 {% block main %}
@@ -52,22 +54,24 @@
                       {% endif %}
                   </p>
               </li>
+
+
           {% endfor %}
+                <div class="review-form-wrapper">
+                    {{ form_start(form) }}
+                    {{ form_widget(form) }}
+                    {# {{ form_widget(form.comment, { 'attr': { 'data': FavoriteProduct.comment }}) }} #}
+
+                    <input type="submit" action="{{ url('mypage_favorite_update', { id : id }) }}" method="POST">
+
+                    {{ form_end(form) }}
+                    <div class="comment-delete-button">
+                    <a href="{{ url('mypage_favorite_complete', {id : id}) }}">評価を削除</a>
+                    </div>
+                </div>
         </ul>
     </div>
   </div>
 </div>
 
-<div class="review-form-wrapper">
-    {{ form_start(form) }}
-    {{ form_widget(form) }}
-    {# {{ form_widget(form.comment, { 'attr': { 'placeholder': 'common.comment' }}) }}
-    {{form_widget(form.priority)}} #}
-    <input type="submit" action="{{ url('mypage_favorite_update', { id : id }) }}" method="POST">
-
-    {{ form_end(form) }}
-    <div class="comment-delete-button">
-    <a href="{{ url('mypage_favorite_complete', {id : id}) }}">評価を削除</a>
-    </div>
-</div>
 {% endblock %}

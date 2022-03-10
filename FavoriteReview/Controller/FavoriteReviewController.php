@@ -152,8 +152,7 @@ class FavoriteReviewController extends AbstractController
             $this->eccubeConfig['eccube_search_pmax'],
             ['wrap-queries' => true]
         );
-// dump($pagination);
-// exit;
+
             return [
                 'pagination' => $pagination,
                 'Customer' => $Customer
@@ -171,33 +170,29 @@ class FavoriteReviewController extends AbstractController
      */
     public function update(Request $request, PaginatorInterface $paginator, $id)
     {
+
+        $comment = $this->customerFavoriteProductRepository->find($id)->getComment();
+        $priority = $this->customerFavoriteProductRepository->find($id)->getPriority();
+
         $form = $this->createFormBuilder()
                 ->add('comment',TextType::class,[
-                    'constraints' => new Assert\Length(["max" => "30"])
+                    'constraints' => new Assert\Length(["max" => "30"]),
+                    'data' => $comment
                 ])
                 // ->add('priority',IntegerType::class)
                 ->add('priority',ChoiceType::class,[
                     'choices' => [
-                    '最優先' => 4,
-                    '優先' => 3,
-                    'ほしい' => 2,
-                    'そこまでいらない' => 1
-                    ]
+                    '4:最優先' => 4,
+                    '3:優先' => 3,
+                    '2:ほしい' => 2,
+                    '1:そこまでいらない' => 1
+                    ],
+                    'data' => $priority
                     ])
                 ->getForm();
 
-        $intId = intval($id);
 
-        //編集中
-        // $fp = $this->customerFavoriteProductRepository->find($id)->getProduct();
-        // dump($fp);,
-        // exit;
-
-        // $fpName = $fp->getName();
-        // $fpImage = $fp->getImage();
-        // $favoriteProduct = $this->productRepository->getProduct();
-        // $favoriteProduct= $this->customerFavoriteProductRepository->find($id);
-
+        // コメントを編集中の商品の情報をとってくる
         $Customer = $this->getUser();
 
         // paginator
@@ -218,23 +213,11 @@ class FavoriteReviewController extends AbstractController
             $this->eccubeConfig['eccube_search_pmax'],
             ['wrap-queries' => true]
         );
-// dump($pagination);
-// exit;
-
-
-
-
+        // 商品情報ここまで
 
 
         if($request->getMethod() == "POST"){
-            // $CustomerFavoriteProduct2 = $this->customerFavoriteProductRepository->find($id);
-            // $FavoriteReview2 = $this->FavoriteReviewRepository->find($CustomerFavoriteProduct2);
-            // ここにupdateを書いていたけど、同じテーブルにある今必要ないのか？
-            // $fp2 = $this->customerFavoriteProductRepository->find($id);
 
-            // if($fp2){
-            //     $this->customerFavoriteProductRepository->delete($id);
-            // }
 
             $form->handleRequest($request);
             $fp = $this->customerFavoriteProductRepository->find($id);
@@ -348,14 +331,13 @@ class FavoriteReviewController extends AbstractController
 
             $twitter_share_url = 'https://twitter.com/intent/tweet?url=http://localhost:8091/favorite_share/'.$user_id.'&text=お気に入りリストです！';
             $facebook_share_url = 'https://www.facebook.com/sharer.php?src=bm&u=http://localhost:8091/favorite_share/'.$user_id.'&t=お気に入りリストです！';
-    // dump($pagination);
-    // exit;
-                return [
-                    'pagination' => $pagination,
-                    'twitter_share_url' => $twitter_share_url,
-                    'facebook_share_url' => $facebook_share_url,
-                    'Customer' => $Customer
-                ];
+
+            return [
+                'pagination' => $pagination,
+                'twitter_share_url' => $twitter_share_url,
+                'facebook_share_url' => $facebook_share_url,
+                'Customer' => $Customer
+            ];
 
             }
 }
