@@ -35,6 +35,27 @@ class FavoriteReviewRepository extends AbstractRepository
     }
 
     /**
+     * @param  \Eccube\Entity\Customer $Customer
+     * @param $id
+     *
+     * @return QueryBuilder
+     */
+    public function getQueryBuilderByReviewId(\Eccube\Entity\Customer $Customer, $id)
+    {
+        $qb = $this->createQueryBuilder('cfp')
+            ->select('cfp, p')
+            ->innerJoin('cfp.Product', 'p')
+            ->where('cfp.Customer = :Customer AND p.Status = 1')
+            ->andWhere('cfp.id = :id')
+            ->setParameter('Customer', $Customer)
+            ->setParameter('id', $id);
+
+
+        return $qb;
+    }
+
+
+    /**
      * お気に入りのレビューを削除します.
      *
      * @param \Eccube\Entity\CustomerFavoriteProduct $CustomerFavoriteProduct
