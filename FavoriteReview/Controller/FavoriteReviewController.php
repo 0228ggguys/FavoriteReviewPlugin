@@ -310,8 +310,6 @@ class FavoriteReviewController extends AbstractController
             }
 
             $Customer = $this->customerRepository->find($user_id);
-            // dump($Customer);
-            // exit;
 
             // paginator
             $qb = $this->customerFavoriteProductRepository->getQueryBuilderByCustomer($Customer);
@@ -332,7 +330,7 @@ class FavoriteReviewController extends AbstractController
                 ['wrap-queries' => true]
             );
 
-            $share = $this->customerRepository->find($user_id)->getShare();
+            $share = $Customer->getShare();
 
             $form = $this->createFormBuilder()
                 ->add('share',ChoiceType::class,[
@@ -344,34 +342,37 @@ class FavoriteReviewController extends AbstractController
                 ])
                 ->getForm();
 
-                if($request->getMethod() == "POST"){
+            if($request->getMethod() == "POST") {
 
+                $form->handleRequest($request);
+                $c = $this->customerRepository->find($user_id);
+                $c->setShare($form->get('share')->getData());
 
-                    $form->handleRequest($request);
-                    $c = $this->customerRepository->find($user_id);
-                    // $CustomerFavoriteProduct = $this->customerFavoriteProductRepository->find($id);
-                    $c->setShare($form->get('share')->getData());
+                if($form->isSubmitted() && $form->isValid()){
 
-                    if($form->isSubmitted() && $form->isValid()){
-
-                        $em = $this->getDoctrine()->getManager();
-                        $em->persist($c);
-                        $em->flush();
-                    }
-
+                    $em = $this->getDoctrine()->getManager();
+                    $em->persist($c);
+                    $em->flush();
                 }
+
+            }
 
             $twitter_share_url = 'https://twitter.com/intent/tweet?url=http://localhost:8091/favorite_share/'.$user_id.'&text=お気に入りリストです！';
             $facebook_share_url = 'https://www.facebook.com/sharer.php?src=bm&u=http://localhost:8091/favorite_share/'.$user_id.'&t=お気に入りリストです！';
 
             // 「非公開ページ　かつ　外部ユーザーのアクセス」をはじく
-            $user = $this->getUser();
-            $customer2 = $this->customerRepository->find($user_id);
-            if($customer2->getShare() == 0 && $user->getId() != $user_id)
-            {
+            $user = $this->getUser();               // ページを見ているユーザー
+            if($user) {                             // 非ログインなら$userは空
+                $auth = $user->getId() == $user_id; // ページを見ている人とページを持つ人が一致していたらtrue
+            } else {
+                $auth = 0;
+            }
+
+            if($share == 0 && $auth == 0) {         // 非公開ページ　かつ　外部ユーザー
                 return $this->render('FavoriteReview/Resource/template/Mypage/share_error.twig', [
                 ]);
             }
+
 
 
                 return [
@@ -380,7 +381,8 @@ class FavoriteReviewController extends AbstractController
                     'facebook_share_url' => $facebook_share_url,
                     'Customer' => $Customer,
                     'user_id' => $user_id,
-                    'form' => $form->createView()
+                    'form' => $form->createView(),
+                    'auth' => $auth
                 ];
 
 

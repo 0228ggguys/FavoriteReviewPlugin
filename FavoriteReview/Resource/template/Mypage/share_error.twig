@@ -1,1 +1,31 @@
-<h2>この方のお気に入りリストは非公開です</h2>
+{% extends 'default_frame.twig' %}
+
+{% set mypageno = 'favorite4' %}
+
+{% set body_class = 'mypage' %}
+
+{% block main %}
+
+<div class="ec-mypageRole">
+    <div class="ec-pageHeader">
+        <h1>〇〇さんのお気に入り一覧</h1>
+    </div>
+    {# {% include 'Mypage/navi.twig' %} #}
+</div>
+
+<div class="ec-registerCompleteRole">
+    <div class="ec-off2Grid ec-text-ac">
+        <div class="ec-off2Grid__cell">
+            <div class="ec-reportHeading">
+                <h2>この方はお気に入り商品を非表示にしています</h2>
+            </div>
+            <p class="ec-reportDescription">{{ 'front.mypage.customer_complete_message__body'|trans }}</p>
+            <div class="ec-off4Grid">
+                <div class="ec-off4Grid__cell"><a class="ec-blockBtn--cancel" href="{{ url('homepage') }}">ホームへ戻る</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -7,6 +7,13 @@
 {% block main %}
 
 <style>
+.form-wrapper{
+    border-bottom: 1px solid #32a1ce;
+    margin:10px 2% 20px 50%;
+}
+.favorite-share-form{
+    margin:10px 2% 10px 10%;
+}
 .star-display{
   display: flex;
 }
@@ -25,6 +32,10 @@
 .fab{
     margin: 0 10px 20px 10px;
 }
+.sns-share{
+    border-top: 1px solid #32a1ce;
+    margin:10px 50% 10px 0;
+}
 </style>
 
 <link href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" rel="stylesheet">
@@ -37,11 +48,18 @@
             </div>
             {# {% include 'Mypage/navi.twig' %} #}
         </div>
+        {% if auth  %}
+        <div class="form-wrapper">
+        <h4>ページを公開する</h4>
+            <div class="favorite-share-form">
                 {{ form_start(form) }}
                 {{ form_widget(form) }}
                 <input type="submit" action="{{ url('favorite_share', { user_id : Customer.id }) }}" method="POST">
 
                 {{ form_end(form) }}
+            </div>
+        </div>
+        {% endif %}
         <div class="ec-mypageRole">
             <div class="ec-favoriteRole">
                 {% if pagination.totalItemCount > 0 %}
@@ -88,10 +106,12 @@
 
 
 
-                {# ログインしていれば別ユーザーの画面でもみれてしまう。 #}
-                {% if is_granted('ROLE_USER') %}
-                    <a href="{{twitter_share_url}}"><i class="fab fa-twitter fa-4x"></i></a>
-                    <a href="{{facebook_share_url}}"><i class="fab fa-facebook fa-4x"></i></a>
+                {% if auth %}
+                <div class="sns-share">
+                    <h4 class="sns-share-title">ページを共有する</h4>
+                    <a href="{{twitter_share_url}}"><i class="fab fa-twitter fa-3x"></i></a>
+                    <a href="{{facebook_share_url}}"><i class="fab fa-facebook fa-3x"></i></a>
+                </div>
                 {% endif %}
                 <div class="ec-off4Grid">
                     <div class="ec-off4Grid__cell"><a class="ec-blockBtn--cancel" href="{{ url('mypage_favorite') }}">サイトへ戻る</a>
