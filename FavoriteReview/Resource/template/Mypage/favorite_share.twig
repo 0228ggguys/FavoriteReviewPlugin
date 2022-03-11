@@ -92,7 +92,11 @@
                                             {% endif %}
                                         {% endfor %}
                                     </div>
-
+                                    <div class="gift-button">
+                                        {% if canGift %}
+                                            <a href="{{ url('gift_purchase', { id : FavoriteProduct.id }) }}">ギフトとして購入する</a>
+                                        {% endif %}
+                                    </div>
                                 </li>
                             {% endfor %}
                         </ul>

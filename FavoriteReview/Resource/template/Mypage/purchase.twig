@@ -1,0 +1,7 @@
+<h2>ギフト購入ページです</h2>
+{{ form_start(form)}}
+{{ form_widget(form)}}
+
+<input type="submit" action="{{ url('gift_confirm') }}" method="POST">
+
+{{ form_end(form) }}

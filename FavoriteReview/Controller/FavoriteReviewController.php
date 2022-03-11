@@ -30,6 +30,7 @@ use Eccube\Repository\OrderRepository;
 use Eccube\Repository\ProductRepository;
 use Eccube\Repository\CustomerRepository;
 use Plugin\FavoriteReview\Repository\FavoriteReviewRepository;
+use Plugin\FavoriteReview\Repository\GiftRepository;
 use Eccube\Service\CartService;
 use Eccube\Service\PurchaseFlow\PurchaseContext;
 use Eccube\Service\PurchaseFlow\PurchaseFlow;
@@ -95,6 +96,7 @@ class FavoriteReviewController extends AbstractController
      * @param OrderRepository $orderRepository
      * @param CustomerRepository $customerRepository
      * @param FavoriteReviewRepository $favoriteReviewRepository
+     * @param GiftRepository $giftRepository
      * @param ProductRepository $productRepository
      * @param CustomerFavoriteProductRepository $customerFavoriteProductRepository
      * @param CartService $cartService
@@ -106,6 +108,7 @@ class FavoriteReviewController extends AbstractController
         CustomerRepository $customerRepository,
         ProductRepository $productRepository,
         FavoriteReviewRepository $favoriteReviewRepository,
+        GiftRepository $giftRepository,
         CustomerFavoriteProductRepository $customerFavoriteProductRepository,
         CartService $cartService,
         BaseInfoRepository $baseInfoRepository,
@@ -115,6 +118,7 @@ class FavoriteReviewController extends AbstractController
         $this->customerRepository = $customerRepository;
         $this->productRepository = $productRepository;
         $this->favoriteReviewRepository = $favoriteReviewRepository;
+        $this->giftRepository = $giftRepository;
         $this->customerFavoriteProductRepository = $customerFavoriteProductRepository;
         $this->BaseInfo = $baseInfoRepository->get();
         $this->cartService = $cartService;
@@ -298,93 +302,192 @@ class FavoriteReviewController extends AbstractController
     }
 
      /**
-         * お気に入り商品をシェアする.
-         *
-         * @Route("/favorite_share/{user_id}", name="favorite_share", methods={"GET","POST"})
-         * @Template("FavoriteReview/Resource/template/Mypage/favorite_share.twig")
-         */
-        public function favoriteShare(Request $request, PaginatorInterface $paginator, $user_id)
-        {
-            if (!$this->BaseInfo->isOptionFavoriteProduct()) {
-                throw new NotFoundHttpException();
+     * お気に入り商品をシェアする.
+     *
+     * @Route("/favorite_share/{user_id}", name="favorite_share", methods={"GET","POST"})
+     * @Template("FavoriteReview/Resource/template/Mypage/favorite_share.twig")
+     */
+    public function favoriteShare(Request $request, PaginatorInterface $paginator, $user_id)
+    {
+        if (!$this->BaseInfo->isOptionFavoriteProduct()) {
+            throw new NotFoundHttpException();
+        }
+
+        $Customer = $this->customerRepository->find($user_id);
+
+        // paginator
+        $qb = $this->customerFavoriteProductRepository->getQueryBuilderByCustomer($Customer);
+
+        $event = new EventArgs(
+            [
+                'qb' => $qb,
+                'Customer' => $Customer,
+            ],
+            $request
+        );
+        $this->eventDispatcher->dispatch(EccubeEvents::FRONT_MYPAGE_MYPAGE_FAVORITE_SEARCH, $event);
+
+        $pagination = $paginator->paginate(
+            $qb,
+            $request->get('pageno', 1),
+            $this->eccubeConfig['eccube_search_pmax'],
+            ['wrap-queries' => true]
+        );
+
+        $share = $Customer->getShare();
+        $gift = $Customer->getGift();
+
+        $form = $this->createFormBuilder()
+            ->add('share',ChoiceType::class,[
+                'data' => $share,
+                'choices' => [
+                '公開' => true,
+                '非公開' => false
+                ]
+            ])
+            ->add('gift',ChoiceType::class,[
+                'data' => $gift,
+                'choices' => [
+                'ON' => true,
+                'OFF' => false
+                ]
+            ])
+            ->getForm();
+
+        if($request->getMethod() == "POST") {
+
+            $form->handleRequest($request);
+            $c = $this->customerRepository->find($user_id);
+            $c->setShare($form->get('share')->getData());
+            $c->setGift($form->get('gift')->getData());
+
+            if($form->isSubmitted() && $form->isValid()){
+
+                $em = $this->getDoctrine()->getManager();
+                $em->persist($c);
+                $em->flush();
             }
 
-            $Customer = $this->customerRepository->find($user_id);
+        }
 
-            // paginator
-            $qb = $this->customerFavoriteProductRepository->getQueryBuilderByCustomer($Customer);
+        $twitter_share_url = 'https://twitter.com/intent/tweet?url=http://localhost:8091/favorite_share/'.$user_id.'&text=お気に入りリストです！';
+        $facebook_share_url = 'https://www.facebook.com/sharer.php?src=bm&u=http://localhost:8091/favorite_share/'.$user_id.'&t=お気に入りリストです！';
 
-            $event = new EventArgs(
-                [
-                    'qb' => $qb,
-                    'Customer' => $Customer,
-                ],
-                $request
-            );
-            $this->eventDispatcher->dispatch(EccubeEvents::FRONT_MYPAGE_MYPAGE_FAVORITE_SEARCH, $event);
+        // 「非公開ページ　かつ　外部ユーザーのアクセス」をはじく
+        $user = $this->getUser();               // ページを見ているユーザー
+        if($user) {                             // 非ログインなら$userは空
+            $auth = $user->getId() == $user_id; // ページを見ている人とページを持つ人が一致していたらtrue
+        } else {
+            $auth = 0;
+        }
+        if($share == 0 && $auth == 0) {         // 非公開ページ　かつ　外部ユーザー
+            return $this->render('FavoriteReview/Resource/template/Mypage/share_error.twig', [
+            ]);
+        }
 
-            $pagination = $paginator->paginate(
-                $qb,
-                $request->get('pageno', 1),
-                $this->eccubeConfig['eccube_search_pmax'],
-                ['wrap-queries' => true]
-            );
+        // 「ログイン済みの別ユーザー」かつ「ギフトがON」なら購入ボタンを出す
+        $gift = $this->customerRepository->find($user_id)->getGift();
+        $canGift = 0;
+        if($user    && $auth == 0 && $gift == 1) {
+        // ログイン済 &  別ユーザー   &  ギフトがON
+            $canGift = 1;                     // 真なら購入ボタンを表示する
+        }
 
-            $share = $Customer->getShare();
 
-            $form = $this->createFormBuilder()
-                ->add('share',ChoiceType::class,[
-                    'data' => $share,
-                    'choices' => [
-                    '公開' => true,
-                    '非公開' => false
-                    ]
-                ])
-                ->getForm();
+        return [
+            'pagination' => $pagination,
+            'twitter_share_url' => $twitter_share_url,
+            'facebook_share_url' => $facebook_share_url,
+            'Customer' => $Customer,
+            'user_id' => $user_id,
+            'form' => $form->createView(),
+            'auth' => $auth,
+            'canGift' => $canGift
+        ];
 
-            if($request->getMethod() == "POST") {
+    }
+
+    /**
+     * ギフトを購入する.
+     *
+     * @Route("/gift_purchase/{id}", name="gift_purchase", methods={"GET","POST"})
+     * @Template("FavoriteReview/Resource/template/Mypage/purchase.twig")
+     */
+    public function giftPurchase(Request $request, PaginatorInterface $paginator, $id)
+    {
+        // コメントを編集中の商品の情報をとってくる
+        // お気に入り所有者のユーザー情報をとってこなくては
+        // $Customer = $this->getUser();
+        $user_id = $this->getUser();
+        $Customer = $this->customerRepository->find($user_id);
+
+        // paginator
+        $qb = $this->favoriteReviewRepository->getQueryBuilderByReviewId($Customer, $id);
+
+        $event = new EventArgs(
+            [
+                'qb' => $qb,
+                'Customer' => $Customer,
+            ],
+            $request
+        );
+        $this->eventDispatcher->dispatch(EccubeEvents::FRONT_MYPAGE_MYPAGE_FAVORITE_SEARCH, $event);
+
+        $pagination = $paginator->paginate(
+            $qb,
+            $request->get('pageno', 1),
+            $this->eccubeConfig['eccube_search_pmax'],
+            ['wrap-queries' => true]
+        );
+        // 商品情報ここまで
+
+
+        $form = $this->createFormBuilder()
+            ->add('comment',TextType::class,[])
+            ->add('amount',IntegerType::class,[])
+            ->add('name',TextType::class,[])
+            ->getForm();
+
+            if($request->getMethod() == "POST"){
+
 
                 $form->handleRequest($request);
-                $c = $this->customerRepository->find($user_id);
-                $c->setShare($form->get('share')->getData());
+                $gift = new \Plugin\FavoriteReview\Entity\Gift();
+                // $CustomerFavoriteProduct = $this->customerFavoriteProductRepository->find($id);
+                $gift->setGiveUserId($this->getUser())
+                ->setTakeUserId($user_id)
+                ->setFavoriteId($id)
+                ->setComment($form->get('comment')->getData())
+                ->setName($form->get('name')->getData())
+                ->setAmount($form->get('amount')->getData());
 
                 if($form->isSubmitted() && $form->isValid()){
 
                     $em = $this->getDoctrine()->getManager();
-                    $em->persist($c);
+                    $em->persist($gift);
                     $em->flush();
                 }
 
-            }
-
-            $twitter_share_url = 'https://twitter.com/intent/tweet?url=http://localhost:8091/favorite_share/'.$user_id.'&text=お気に入りリストです！';
-            $facebook_share_url = 'https://www.facebook.com/sharer.php?src=bm&u=http://localhost:8091/favorite_share/'.$user_id.'&t=お気に入りリストです！';
-
-            // 「非公開ページ　かつ　外部ユーザーのアクセス」をはじく
-            $user = $this->getUser();               // ページを見ているユーザー
-            if($user) {                             // 非ログインなら$userは空
-                $auth = $user->getId() == $user_id; // ページを見ている人とページを持つ人が一致していたらtrue
-            } else {
-                $auth = 0;
-            }
-
-            if($share == 0 && $auth == 0) {         // 非公開ページ　かつ　外部ユーザー
-                return $this->render('FavoriteReview/Resource/template/Mypage/share_error.twig', [
+                return $this->render('FavoriteReview/Resource/template/Mypage/gift_confirm.twig', [
                 ]);
             }
 
+        return [
+            'pagination' => $pagination,
+            'form' => $form->createView(),
+        ];
+    }
+
+    /**
+     * ギフトの購入を確認する.
+     *
+     * @Route("/gift_confirm", name="gift_confirm", methods={"GET","POST"})
+     * @Template("FavoriteReview/Resource/template/Mypage/gift_confirm.twig")
+     */
+    public function giftConfirm(Request $request, PaginatorInterface $paginator)
+    {
+        return[];
+    }
 
 
-                return [
-                    'pagination' => $pagination,
-                    'twitter_share_url' => $twitter_share_url,
-                    'facebook_share_url' => $facebook_share_url,
-                    'Customer' => $Customer,
-                    'user_id' => $user_id,
-                    'form' => $form->createView(),
-                    'auth' => $auth
-                ];
-
-
-            }
-        }
+}
