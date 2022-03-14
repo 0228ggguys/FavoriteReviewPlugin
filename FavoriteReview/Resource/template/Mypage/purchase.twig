@@ -1,7 +1,61 @@
-<h2>ギフト購入ページです</h2>
-{{ form_start(form)}}
-{{ form_widget(form)}}
+{% extends 'default_frame.twig' %}
 
-<input type="submit" action="{{ url('gift_confirm') }}" method="POST">
+{% set body_class = 'mypage' %}
 
-{{ form_end(form) }}
+{% block main %}
+
+{% block stylesheet %}
+<style>
+.review-form-wrapper{
+    margin: 0 5%;
+}
+</style>
+{% endblock %}
+
+<div class="ec-mypageRole">
+    <div class="ec-pageHeader">
+        <h1>ギフトの購入</h1>
+    </div>
+    {% include 'Mypage/navi.twig' %}
+</div>
+
+<div class="ec-mypageRole">
+  <div class="ec-favoriteRole">
+    <div class="ec-favoriteRole__detail">
+        <ul class="ec-favoriteRole__itemList">
+          {{ dump() }}
+          {% for FavoriteProduct in pagination %}
+              {% set Product = FavoriteProduct.Product %}
+              <li class="ec-favoriteRole__item">
+                  <a class="ec-favoriteRole__itemThumb" href="{{ url('product_detail', {'id': Product.id}) }}">
+                      <p class="ec-favoriteRole__item-image">
+                          <img src="{{ asset(Product.main_list_image|no_image_product, 'save_image') }}">
+                      </p>
+                  </a>
+                  <p class="ec-favoriteRole__itemTitle">{{ Product.name }}</p>
+                  <p class="ec-favoriteRole__itemPrice">
+                      {% if Product.price02_inc_tax_min == Product.price02_inc_tax_max %}
+                          {{ Product.price02_inc_tax_min|price }}
+                      {% else %}
+                          {{ Product.price02_inc_tax_min|price }}～{{ Product.price02_inc_tax_max|price }}
+                      {% endif %}
+                  </p>
+              </li>
+
+
+          {% endfor %}
+
+        </ul>
+    </div>
+  </div>
+  <div class="review-form-wrapper">
+    {{ form_start(form)}}
+    {{ form_widget(form)}}
+
+    <input type="submit" action="{{ url('gift_confirm') }}" method="POST">
+
+    {{ form_end(form) }}
+  </div>
+</div>
+
+{% endblock %}

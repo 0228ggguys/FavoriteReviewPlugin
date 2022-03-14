@@ -54,6 +54,24 @@ class FavoriteReviewRepository extends AbstractRepository
         return $qb;
     }
 
+    /**
+     * @param $id
+     *
+     * @return QueryBuilder
+     */
+    public function getQueryBuilderByReviewIdOnly($id)
+    {
+        $qb = $this->createQueryBuilder('cfp')
+            ->select('cfp, p')
+            ->innerJoin('cfp.Product', 'p')
+            ->andWhere('cfp.id = :id')
+            ->setParameter('Customer', $Customer)
+            ->setParameter('id', $id);
+
+
+        return $qb;
+    }
+
 
     /**
      * お気に入りのレビューを削除します.

@@ -47,4 +47,15 @@ class GiftRepository extends AbstractRepository
         return $qb;
     }
 
+    /**
+     * @return QueryBuilder
+     */
+    public function getCount()
+    {
+        $qb = $this->createQueryBuilder('g')
+            ->select('COUNT(g.id)');
+
+        return $qb;
+    }
 }
+
