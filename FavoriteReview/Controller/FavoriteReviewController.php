@@ -415,11 +415,9 @@ class FavoriteReviewController extends AbstractController
      */
     public function giftPurchase(Request $request, PaginatorInterface $paginator, $id)
     {
-        // コメントを編集中の商品の情報をとってくる
-        // お気に入り所有者のユーザー情報をとってこなくては
-        // $Customer = $this->getUser();
-        $user_id = $this->getUser();
-        $Customer = $this->customerRepository->find($user_id);
+        // 受け取る人の商品情報を取得
+        $taker_id = $this->customerFavoriteProductRepository->find($id)->getCustomer()->getId();
+        $Customer = $this->customerRepository->find($taker_id);
 
         // paginator
         $qb = $this->favoriteReviewRepository->getQueryBuilderByReviewId($Customer, $id);
@@ -443,19 +441,24 @@ class FavoriteReviewController extends AbstractController
 
 
         $form = $this->createFormBuilder()
-            ->add('comment',TextType::class,[])
-            ->add('amount',IntegerType::class,[])
-            ->add('name',TextType::class,[])
-            ->getForm();
+        ->add('comment',TextType::class,[])
+        ->add('amount',IntegerType::class,[])
+        ->add('name',TextType::class,[])
+        ->getForm();
 
+        // 送る側のユーザー情報を取得
+        $user = $this->getUser();
+        $user_id = $user->getId();
+        
             if($request->getMethod() == "POST"){
 
+                $count = $this->giftRepository->getCount()->getQuery()->getSingleScalarResult() + 1;
 
                 $form->handleRequest($request);
                 $gift = new \Plugin\FavoriteReview\Entity\Gift();
-                // $CustomerFavoriteProduct = $this->customerFavoriteProductRepository->find($id);
-                $gift->setGiveUserId($this->getUser())
-                ->setTakeUserId($user_id)
+                $gift->setId($count)
+                ->setGiveUserId($user_id)
+                ->setTakeUserId($taker_id)
                 ->setFavoriteId($id)
                 ->setComment($form->get('comment')->getData())
                 ->setName($form->get('name')->getData())
@@ -466,9 +469,12 @@ class FavoriteReviewController extends AbstractController
                     $em = $this->getDoctrine()->getManager();
                     $em->persist($gift);
                     $em->flush();
+
+
                 }
 
                 return $this->render('FavoriteReview/Resource/template/Mypage/gift_confirm.twig', [
+                    'gift_id' => $count
                 ]);
             }
 

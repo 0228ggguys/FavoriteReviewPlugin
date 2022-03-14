@@ -101,7 +101,19 @@ if (!class_exists('\Plugin\FavoriteReview\Entity\Gift')) {
 
 
 
+        /**
+         * Set id.
+         *
+         * @param int $id
+         *
+         * @return Gift
+         */
+        public function setId($id)
+        {
+            $this->id = $id;
 
+            return $this;
+        }
 
         /**
          * Get id.
