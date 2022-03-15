@@ -14,10 +14,16 @@ file that was distributed with this source code.
 
 {% set body_class = 'mypage' %}
 
-{% block main %}
-
 {% block stylesheet %}
+
 <style>
+.fa-eye{
+    color: #e6e6fa;
+    cursor: pointer;
+}
+.opened{
+    color: #eb6100;
+}
 .star-display{
   display: flex;
 }
@@ -33,8 +39,11 @@ file that was distributed with this source code.
   color: #ccc;
   font-size: 20px;
 }
+.edit-comment{
+    margin: 4px 0;
+}
 .edit-comment a{
-  font-size: 14px;
+  font-size: 16px;
   padding: 2px;
   border: solid 1px #333;
   border-radius:2px;
@@ -45,23 +54,40 @@ a.btn--sns {
   color: #fff;
   background-color: #eb6100;
 }
-/* .btn--comment,
-a.btn--comment {
-  color: #fff;
-  background-color: #505050;
-} */
 .btn--sns:hover,
 a.btn--sns:hover {
   color: #fff;
   background: #f56500;
 }
-/* .btn--comment:hover,
-a.btn--comment:hover {
-  color: #fff;
-  background: #686868;
-} */
 </style>
 {% endblock %}
+
+
+{% block javascript %}
+<script>
+$(function(){
+    let open = $('.open-toggle');
+    let openId;
+    open.on('click',function(){
+        let $this = $(this); //this=イベントの発火した要素＝iタグを代入
+        openId = $this.data('id'); //iタグに仕込んだdata-idの値を得る
+        $.ajax({
+            method: "POST",
+            url: "/mypage/open/status",
+            data: {'id' : openId},
+            })
+            .done(function(data){
+            $this.toggleClass('opened');
+            console.log('success!');
+            }).fail(function(){
+            console.log('fail!!')
+        });
+    });
+});
+</script>
+{% endblock %}
+
+{% block main %}
 
     <div class="ec-layoutRole__main">
         <div class="ec-mypageRole">
@@ -70,7 +96,6 @@ a.btn--comment:hover {
             </div>
             {% include 'Mypage/navi.twig' %}
         </div>
-{# {{ dump() }} #}
         <div class="ec-mypageRole">
             <div class="ec-favoriteRole">
                 {% if pagination.totalItemCount > 0 %}
@@ -95,8 +120,8 @@ a.btn--comment:hover {
                                         </p>
                                     </a>
                                     <p class="ec-favoriteRole__itemTitle">{{ Product.name }}</p>
-                                    <form>
-                                    <input type="hidden"
+
+
                                     <p class="ec-favoriteRole__itemPrice">
                                         {% if Product.price02_inc_tax_min == Product.price02_inc_tax_max %}
                                             {{ Product.price02_inc_tax_min|price }}
@@ -104,7 +129,6 @@ a.btn--comment:hover {
                                             {{ Product.price02_inc_tax_min|price }}～{{ Product.price02_inc_tax_max|price }}
                                         {% endif %}
                                     </p>
-                                    {# {{ dump() }} #}
                                     <p>{{ FavoriteProduct.comment }}</p>
                                     <div class="star-display">
                                         {% for i in range(1,4) %}
@@ -114,8 +138,17 @@ a.btn--comment:hover {
                                         {% endfor %}
                                     </div>
 
+
                                     <div class="edit-comment">
                                     <a href="{{ url('mypage_favorite_update', { id : FavoriteProduct.id }) }}">コメントを編集</a>
+                                    {# <input type="submit" action="{{ url('mypage_favorite_open', { id : FavoriteProduct.id }) }}" method="POST"> #}
+                                    </div>
+                                    <div class="open-status-wrapper">
+                                        {% if FavoriteProduct.open %}
+                                        <i class="fas fa-eye open-toggle opened" data-id={{FavoriteProduct.id}}></i>
+                                        {% else %}
+                                        <i class="fas fa-eye open-toggle" data-id={{FavoriteProduct.id}}></i>
+                                        {% endif %}
                                     </div>
 
                                 </li>
@@ -132,6 +165,7 @@ a.btn--comment:hover {
                 <a href="{{ url('favorite_share', { user_id : Customer.id }) }}" class="btn btn--sns">SNSでシェアする</a>
                 </div>
             </div>
+
         </div>
     </div>
 {% endblock %}

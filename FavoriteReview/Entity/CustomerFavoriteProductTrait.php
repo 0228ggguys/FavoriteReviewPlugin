@@ -26,6 +26,13 @@ trait CustomerFavoriteProductTrait
     private $priority;
 
     /**
+     * @var boolean
+     *
+     * @ORM\Column(name="open", type="boolean", options={"default":false})
+     */
+    private $open;
+
+    /**
      * Set comment.
      *
      *
@@ -72,6 +79,30 @@ trait CustomerFavoriteProductTrait
     public function getPriority()
     {
         return $this->priority;
+    }
+
+    /**
+     * Set open.
+     *
+     * @param boolean $open
+     *
+     * @return Customer
+     */
+    public function setOpen($open)
+    {
+        $this->open = $open;
+
+        return $this;
+    }
+
+    /**
+     * Get open.
+     *
+     * @return boolean
+     */
+    public function getOpen()
+    {
+        return $this->open;
     }
 
 }

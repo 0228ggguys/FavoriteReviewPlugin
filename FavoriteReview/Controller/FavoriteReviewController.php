@@ -128,7 +128,7 @@ class FavoriteReviewController extends AbstractController
     /**
      * お気に入り商品を表示する.
      *
-     * @Route("/mypage/favorite", name="mypage_favorite", methods={"GET"})
+     * @Route("/mypage/favorite", name="mypage_favorite", methods={"GET","POST"})
      * @Template("FavoriteReview/Resource/template/Mypage/favorite.twig")
      */
     public function favorite(Request $request, PaginatorInterface $paginator)
@@ -158,12 +158,46 @@ class FavoriteReviewController extends AbstractController
         );
 // dump($pagination);
 // exit;
-            return [
-                'pagination' => $pagination,
-                'Customer' => $Customer
-            ];
 
+        return [
+            'pagination' => $pagination,
+            'Customer' => $Customer,
+        ];
+
+    }
+
+
+    /**
+     * ajax処理で'open'カラムを変えたいidを持ってくる
+     *
+     * @Route("/mypage/open/status", name="change_open_status", methods={"POST"})
+     * @param $request
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     */
+    public function changeOpenStatus(Request $request)
+    {
+        if (!$request->isXmlHttpRequest()) {
+            throw new BadRequestHttpException();
         }
+
+        $id = $request->get('id');
+
+
+        $cfp = $this->customerFavoriteProductRepository->find($id);
+        if($cfp->getOpen() == 0){
+            $cfp->setOpen(1);
+        }else{
+            $cfp->setOpen(0);
+        }
+
+        $em = $this->getDoctrine()->getManager();
+        $em->persist($cfp);
+        $em->flush();
+
+        return $this->json([
+            'success' => true
+        ]);
+    }
 
 
 
@@ -449,7 +483,7 @@ class FavoriteReviewController extends AbstractController
         // 送る側のユーザー情報を取得
         $user = $this->getUser();
         $user_id = $user->getId();
-        
+
             if($request->getMethod() == "POST"){
 
                 $count = $this->giftRepository->getCount()->getQuery()->getSingleScalarResult() + 1;
