@@ -8,11 +8,11 @@
 
 <style>
 .form-wrapper{
-    border-bottom: 1px solid #32a1ce;
-    margin:10px 2% 20px 50%;
+  border-bottom: 1px solid #32a1ce;
+  margin:10px 2% 20px 50%;
 }
 .favorite-share-form{
-    margin:10px 2% 10px 10%;
+  margin:10px 2% 10px 10%;
 }
 .star-display{
   display: flex;
@@ -30,11 +30,11 @@
   font-size: 20px;
 }
 .fab{
-    margin: 0 10px 20px 10px;
+  margin: 0 10px 20px 10px;
 }
 .sns-share{
-    border-top: 1px solid #32a1ce;
-    margin:10px 50% 10px 0;
+  border-top: 1px solid #32a1ce;
+  margin:10px 50% 10px 0;
 }
 </style>
 
@@ -70,6 +70,7 @@
                         <ul class="ec-favoriteRole__itemList">
                             {% for FavoriteProduct in pagination %}
                                 {% set Product = FavoriteProduct.Product %}
+                                {% if FavoriteProduct.open %}
                                 <li class="ec-favoriteRole__item">
                                     <a class="ec-favoriteRole__itemThumb" href="{{ url('product_detail', {'id': Product.id}) }}">
                                         <p class="ec-favoriteRole__item-image">
@@ -98,6 +99,7 @@
                                         {% endif %}
                                     </div>
                                 </li>
+                                {% endif %}
                             {% endfor %}
                         </ul>
                     </div>
