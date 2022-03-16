@@ -1,0 +1,123 @@
+{% extends 'default_frame.twig' %}
+
+{% set body_class = 'mypage' %}
+
+{% block main %}
+
+{% block stylesheet %}
+<style>
+.review-form-wrapper{
+    margin: 0 5%;
+}
+.comment-delete-button{
+  margin:10px 0;
+}
+.comment-delete-button a{
+  font-size: 14px;
+  padding: 2px;
+  border: solid 1px #f00;
+  border-radius:2px;
+  background-color: #f99;
+}
+.gifter-comment {
+  position: relative;
+  display: inline-block;
+  margin: 1.5em 0;
+  padding: 7px 10px;
+  min-width: 120px;
+  max-width: 100%;
+  color: #555;
+  font-size: 16px;
+  background: #e0edff;
+}
+
+.gifter-comment:before {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -15px;
+  border: 15px solid transparent;
+  border-top: 15px solid #e0edff;
+}
+
+.gifter-comment p {
+  margin: 0;
+  padding: 0;
+}
+.btn--confirm,
+a.btn--confirm {
+  color: #fff;
+  background-color: #eb6100;
+}
+.btn--confirm:hover,
+a.btn--confirm:hover {
+  color: #fff;
+  background: #f56500;
+}
+.gift-confirm{
+    margin:20px;
+}
+</style>
+{% endblock %}
+
+
+
+<div class="ec-mypageRole">
+    <div class="ec-pageHeader">
+        <h1>ギフトの内容確認</h1>
+    </div>
+    {% include 'Mypage/navi.twig' %}
+</div>
+
+            <p>相手からは次のように表示されます</p>
+<div class="ec-mypageRole">
+  <div class="ec-favoriteRole">
+    <div class="ec-favoriteRole__detail">
+        <ul class="ec-favoriteRole__itemList">
+          {% for FavoriteProduct in pagination %}
+              {% set Product = FavoriteProduct.Product %}
+              <li class="ec-favoriteRole__item">
+                  <a class="ec-favoriteRole__itemThumb" href="{{ url('product_detail', {'id': Product.id}) }}">
+                      <p class="ec-favoriteRole__item-image">
+                          <img src="{{ asset(Product.main_list_image|no_image_product, 'save_image') }}">
+                      </p>
+                  </a>
+                  <p class="ec-favoriteRole__itemTitle">{{ Product.name }}</p>
+                  <p class="ec-favoriteRole__itemPrice">
+                      {% if Product.price02_inc_tax_min == Product.price02_inc_tax_max %}
+                          {{ Product.price02_inc_tax_min|price }}
+                      {% else %}
+                          {{ Product.price02_inc_tax_min|price }}～{{ Product.price02_inc_tax_max|price }}
+                      {% endif %}
+                  </p>
+              </li>
+
+
+          {% endfor %}
+
+        </ul>
+        <div class="gifter-wrapper">
+            <div class="gifter-comment">
+                <p>{{ gift.comment }}</p>
+            </div>
+            <div class="gifter-info">
+                {{ gift.name }}さんから
+                {{ gift.amount }}つのギフトが届きました！
+            </div>
+        </div>
+    </div>
+  </div>
+  <div class="gift-confirm">
+    <a href="{{ url('gift_purchase_complete') }}" class="btn btn--confirm">ギフト内容を確定</a>
+  </div>
+
+</div>
+
+{% endblock %}
+
+
+
+
+
+
