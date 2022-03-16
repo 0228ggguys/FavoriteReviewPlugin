@@ -27,6 +27,7 @@ use Eccube\Form\Type\Front\CustomerLoginType;
 use Eccube\Repository\BaseInfoRepository;
 use Eccube\Repository\CustomerFavoriteProductRepository;
 use Eccube\Repository\OrderRepository;
+use Eccube\Repository\PageRepository;
 use Eccube\Repository\ProductRepository;
 use Eccube\Repository\CustomerRepository;
 use Plugin\FavoriteReview\Repository\FavoriteReviewRepository;
@@ -71,6 +72,11 @@ class FavoriteReviewController extends AbstractController
     protected $customerFavoriteProductRepository;
 
     /**
+     * @var PageRepository
+     */
+    protected $pageRepository;
+
+    /**
      * @var BaseInfo
      */
     protected $BaseInfo;
@@ -98,6 +104,7 @@ class FavoriteReviewController extends AbstractController
      * @param FavoriteReviewRepository $favoriteReviewRepository
      * @param GiftRepository $giftRepository
      * @param ProductRepository $productRepository
+     * @param PageRepository $pageRepository
      * @param CustomerFavoriteProductRepository $customerFavoriteProductRepository
      * @param CartService $cartService
      * @param BaseInfoRepository $baseInfoRepository
@@ -109,6 +116,7 @@ class FavoriteReviewController extends AbstractController
         ProductRepository $productRepository,
         FavoriteReviewRepository $favoriteReviewRepository,
         GiftRepository $giftRepository,
+        PageRepository $pageRepository,
         CustomerFavoriteProductRepository $customerFavoriteProductRepository,
         CartService $cartService,
         BaseInfoRepository $baseInfoRepository,
@@ -119,6 +127,7 @@ class FavoriteReviewController extends AbstractController
         $this->productRepository = $productRepository;
         $this->favoriteReviewRepository = $favoriteReviewRepository;
         $this->giftRepository = $giftRepository;
+        $this->pageRepository = $pageRepository;
         $this->customerFavoriteProductRepository = $customerFavoriteProductRepository;
         $this->BaseInfo = $baseInfoRepository->get();
         $this->cartService = $cartService;
@@ -445,6 +454,7 @@ class FavoriteReviewController extends AbstractController
      * ギフトを購入する.
      *
      * @Route("/gift_purchase/{id}", name="gift_purchase", methods={"GET","POST"})
+     * @Route("/gift_purchase/{id}", name="gift_purchase_confirm", methods={"GET","POST"})
      * @Template("FavoriteReview/Resource/template/Mypage/purchase.twig")
      */
     public function giftPurchase(Request $request, PaginatorInterface $paginator, $id)
@@ -504,12 +514,28 @@ class FavoriteReviewController extends AbstractController
                     $em->persist($gift);
                     $em->flush();
 
-
                 }
 
-                return $this->render('FavoriteReview/Resource/template/Mypage/gift_confirm.twig', [
-                    'gift_id' => $count
-                ]);
+                //もしgiftに値があるならデータを取ってくる
+                // $giftId = $count - 1;
+                // $abc = $this->giftRepository->find(13);
+                // dump($abc);
+                // exit;
+                // if($this->giftRepository->find(13)){
+                //     $gifterInfo = $this->giftRepository->getQueryBuilderById($giftId);
+                // }
+
+                return $this->render(
+                    'FavoriteReview/Resource/template/Mypage/gift_purchase_confirm.twig',
+                    [
+                        'gift_id' => $count,
+                        'gift' => $gift,
+                        'pagination' => $pagination,
+                        'form' => $form->createView(),
+                        'Page' => $this->pageRepository->getPageByRoute('gift_purchase_confirm')
+                    ]
+                );
+
             }
 
         return [
@@ -518,13 +544,15 @@ class FavoriteReviewController extends AbstractController
         ];
     }
 
+
+
     /**
      * ギフトの購入を確認する.
      *
-     * @Route("/gift_confirm", name="gift_confirm", methods={"GET","POST"})
-     * @Template("FavoriteReview/Resource/template/Mypage/gift_confirm.twig")
+     * @Route("/gift_purchase_complete", name="gift_purchase_complete", methods={"GET"})
+     * @Template("FavoriteReview/Resource/template/Mypage/gift_purchase_complete.twig")
      */
-    public function giftConfirm(Request $request, PaginatorInterface $paginator)
+    public function giftComplete(Request $request)
     {
         return[];
     }
