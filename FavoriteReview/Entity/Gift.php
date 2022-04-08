@@ -40,27 +40,21 @@ if (!class_exists('\Plugin\FavoriteReview\Entity\Gift')) {
         /**
          * @var integer
          *
-         * @ORM\Column(name="give_user_id", type="integer", options={"unsigned":true})
-         * @ORM\Id
-         * @ORM\GeneratedValue(strategy="NONE")
+         * @ORM\Column(name="give_user_id", type="integer")
          */
         private $give_user_id;
 
         /**
          * @var integer
          *
-         * @ORM\Column(name="take_user_id", type="integer", options={"unsigned":true})
-         * @ORM\Id
-         * @ORM\GeneratedValue(strategy="NONE")
+         * @ORM\Column(name="take_user_id", type="integer")
          */
         private $take_user_id;
 
         /**
          * @var integer
          *
-         * @ORM\Column(name="favorite_id", type="integer", options={"unsigned":true})
-         * @ORM\Id
-         * @ORM\GeneratedValue(strategy="NONE")
+         * @ORM\Column(name="favorite_id", type="integer")
          */
         private $favorite_id;
 

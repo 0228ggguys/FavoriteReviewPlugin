@@ -162,7 +162,8 @@ class FavoriteReviewController extends AbstractController
         $pagination = $paginator->paginate(
             $qb,
             $request->get('pageno', 1),
-            $this->eccubeConfig['eccube_search_pmax'],
+            // $this->eccubeConfig['eccube_search_pmax'],
+            10,
             ['wrap-queries' => true]
         );
 // dump($pagination);
@@ -374,7 +375,17 @@ class FavoriteReviewController extends AbstractController
             $qb,
             $request->get('pageno', 1),
             $this->eccubeConfig['eccube_search_pmax'],
+            // 12,
             ['wrap-queries' => true]
+        );
+        // $pagination->appends(Input::all());
+
+        $qb2 = $this->giftRepository->getQueryBuilderByTakeUserId($user_id);
+
+        $pagination2 = $paginator->paginate(
+            $qb2,
+            $request->get('pageno', 1),
+            10,
         );
 
         $share = $Customer->getShare();
@@ -439,13 +450,15 @@ class FavoriteReviewController extends AbstractController
 
         return [
             'pagination' => $pagination,
+            'pagination2' => $pagination2,
             'twitter_share_url' => $twitter_share_url,
             'facebook_share_url' => $facebook_share_url,
             'Customer' => $Customer,
             'user_id' => $user_id,
             'form' => $form->createView(),
             'auth' => $auth,
-            'canGift' => $canGift
+            'canGift' => $canGift,
+            'qb2' => $qb2
         ];
 
     }
@@ -496,12 +509,10 @@ class FavoriteReviewController extends AbstractController
 
             if($request->getMethod() == "POST"){
 
-                $count = $this->giftRepository->getCount()->getQuery()->getSingleScalarResult() + 1;
-
                 $form->handleRequest($request);
                 $gift = new \Plugin\FavoriteReview\Entity\Gift();
-                $gift->setId($count)
-                ->setGiveUserId($user_id)
+
+                $gift->setGiveUserId($user_id)
                 ->setTakeUserId($taker_id)
                 ->setFavoriteId($id)
                 ->setComment($form->get('comment')->getData())
@@ -516,19 +527,9 @@ class FavoriteReviewController extends AbstractController
 
                 }
 
-                //もしgiftに値があるならデータを取ってくる
-                // $giftId = $count - 1;
-                // $abc = $this->giftRepository->find(13);
-                // dump($abc);
-                // exit;
-                // if($this->giftRepository->find(13)){
-                //     $gifterInfo = $this->giftRepository->getQueryBuilderById($giftId);
-                // }
-
                 return $this->render(
                     'FavoriteReview/Resource/template/Mypage/gift_purchase_confirm.twig',
                     [
-                        'gift_id' => $count,
                         'gift' => $gift,
                         'pagination' => $pagination,
                         'form' => $form->createView(),

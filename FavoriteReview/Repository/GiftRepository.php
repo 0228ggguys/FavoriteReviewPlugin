@@ -48,14 +48,26 @@ class GiftRepository extends AbstractRepository
     }
 
     /**
+     * @param $take_user_id
+     *
      * @return QueryBuilder
      */
-    public function getCount()
+    public function getQueryBuilderByTakeUserId($user_id)
     {
         $qb = $this->createQueryBuilder('g')
-            ->select('COUNT(g.id)');
+            ->select('g.comment, g.name AS sender_name, cfp.priority, p.name')
+            ->leftJoin('Eccube\Entity\CustomerFavoriteProduct', 'cfp', 'WITH', 'g.favorite_id = cfp.id')
+            ->innerJoin('cfp.Product', 'p')
+            // ->leftJoin('Eccube\Entity\ProductImage', 'pi', 'WITH', 'p.id = pi.product_id')
+
+            ->where('g.take_user_id = :user_id')
+            ->setParameter('user_id', $user_id)
+            ->getQuery()
+            ->getResult();
 
         return $qb;
     }
-}
 
+
+
+}
