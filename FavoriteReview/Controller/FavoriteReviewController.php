@@ -374,8 +374,8 @@ class FavoriteReviewController extends AbstractController
         $pagination = $paginator->paginate(
             $qb,
             $request->get('pageno', 1),
-            $this->eccubeConfig['eccube_search_pmax'],
-            // 12,
+            $this->eccubeConfig['eccube_search_pmax'], //この３つ目の引数が商品数を超えると（２ページ目が必要な状況になると）エラーが出る
+            // 10,
             ['wrap-queries' => true]
         );
         // $pagination->appends(Input::all());

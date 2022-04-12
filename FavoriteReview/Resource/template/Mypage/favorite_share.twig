@@ -1,8 +1,8 @@
 {% extends 'default_frame.twig' %}
 
-{% set mypageno = 'favorite_share' %}
+{% set mypageno = 'favorite' %}
 
-{# {% set body_class = 'mypage' %} #}
+{% set body_class = 'mypage' %}
 
 {% block main %}
 
@@ -36,9 +36,67 @@
   border-top: 1px solid #32a1ce;
   margin:10px 50% 10px 0;
 }
+
+.balloon2-left {
+  position: relative;
+  display: inline-block;
+  margin: 1.5em 0 1.5em 15px;
+  padding: 7px 10px;
+  min-width: 120px;
+  max-width: 100%;
+  color: #555;
+  font-size: 16px;
+  background: #FFF;
+  border: solid 3px #555;
+  box-sizing: border-box;
+}
+
+.balloon2-left:before {
+  /* display:inline-block; */
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -24px;
+  margin-top: -12px;
+  border: 12px solid transparent;
+  border-right: 12px solid #FFF;
+  z-index: 2;
+}
+
+.balloon2-left:after {
+  /* display:inline-block; */
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -30px;
+  margin-top: -14px;
+  border: 14px solid transparent;
+  border-right: 14px solid #555;
+  z-index: 1;
+}
+
+.balloon2-left p {
+  margin: 0;
+  padding: 0;
+}
+
+.baloon{
+  display:inline-block;
+  width: 180px;
+}
+.take_history_name{
+  width: 140px;
+  display: inline-block;
+}
+.take_history_item_name{
+  display:inline-block;
+}
+/* .take_gift_wrapper{
+  height: 200px;
+} */
 </style>
 
-<link href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" rel="stylesheet">
+{# <link href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" rel="stylesheet"> #}
 
 
     <div class="ec-layoutRole__main">
@@ -46,7 +104,7 @@
             <div class="ec-pageHeader">
                 <h1>{{ Customer.name01 }}{{ Customer.name02 }}さんのお気に入り一覧</h1>
             </div>
-            {# {% include 'Mypage/navi.twig' %} #}
+            {% include 'Mypage/navi.twig' %}
         </div>
         {% if auth  %}
         <div class="form-wrapper">
@@ -110,6 +168,32 @@
                     <div class="ec-favoriteRole__header">{{ 'front.mypage.favorite_not_found'|trans }}</div>
                 {% endif %}
 
+
+                <div class="gift_take_history">
+                {% if pagination2.totalItemCount > 0 %}
+                <h2> 受け取ったギフト</h2>
+                    {% for items in pagination2 %}
+                    <div class="take_gift_wrapper">
+                        <div class="take_history_name">
+                        <p>{{ items.sender_name }}</p>
+                        </div>
+                        <div class="baloon">
+                            <div class="balloon2-left">
+                            <p>{{ items.comment }}</p>
+                            </div>
+                        </div>
+                        <div class="take_history_item_name">
+                        {{ items.name }}
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    {# <div class="ec-pagerRole">
+                        {% include "pager.twig" with {'pages': pagination2.paginationData} %}
+                    </div> #}
+
+                {% endif %}
+                </div>
 
 
                 {% if auth %}
