@@ -59,6 +59,51 @@ a.btn--sns:hover {
   color: #fff;
   background: #f56500;
 }
+.favoriteRole__item-wrapper{
+  display:inline-block;
+  padding: 7px;
+  border:thick double #32a1ce;
+  border-radius:15px;
+  /* display:hidden; */
+}
+.privatePublicToggleTab li.active a{
+  color:#c61e79;
+}
+.privatePublicToggleTab li a{
+  text-decoration: none;
+  color: #666;
+  font-weight: 700;
+  display: block;
+  cursor: pointer;
+}
+.privatePublicToggleTab li a:hover{
+  opacity:0.6;
+}
+.privatePublicToggleTab {
+    max-width: 500px;
+    margin: 0 auto;
+    padding-bottom: 8px;
+}
+.privatePublicToggleTab ul {
+    clear: both;
+    overflow: hidden;
+}
+.privatePublicToggleTab li.active {
+    border-bottom-color: #c61e79;
+}
+.privatePublicToggleTab li {
+    background: #fff;
+    width: 33%;
+    float: left;
+    line-height: 30px;
+    text-align: center;
+    color: #c61e79;
+    height: 30px;
+    list-style: none;
+    border-bottom: solid 3px #f6f6f6;
+    -webkit-backface-visibility: hidden;
+    transition: opacity .1s;
+}
 </style>
 {% endblock %}
 
@@ -98,6 +143,12 @@ $(function(){
         </div>
         <div class="ec-mypageRole">
             <div class="ec-favoriteRole">
+            <div class="privatePublicToggleTab">
+                <ul>
+                    <li class="left-filter active"><a>private</a></li>
+                    <li class="right-filter"><a href="{{ url('favorite_share', { user_id : Customer.id }) }}">public</a></li>
+                </ul>
+            </div>
                 {% if pagination.totalItemCount > 0 %}
                     <div class="ec-favoriteRole__header">
                         <p>{{ 'front.mypage.favorite_count'|trans({'%count%':pagination.totalItemCount}) }}</p>
@@ -107,6 +158,7 @@ $(function(){
                             {% for FavoriteProduct in pagination %}
                                 {% set Product = FavoriteProduct.Product %}
                                 <li class="ec-favoriteRole__item">
+                                <div class="favoriteRole__item-wrapper">
                                     <a class="ec-closeBtn--circle"
                                        href="{{ url('mypage_favorite_delete', { id : Product.id }) }}" {{ csrf_token_for_anchor() }}
                                        data-method="delete">
@@ -151,6 +203,7 @@ $(function(){
                                         {% endif %}
                                     </div>
 
+                                </div>
                                 </li>
                             {% endfor %}
                         </ul>
