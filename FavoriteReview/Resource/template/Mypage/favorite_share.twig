@@ -4,7 +4,7 @@
 
 {% set body_class = 'mypage' %}
 
-{% block main %}
+{% block stylesheet %}
 
 <style>
 .form-wrapper{
@@ -94,17 +94,70 @@
 /* .take_gift_wrapper{
   height: 200px;
 } */
+.privatePublicToggleTab li.active a{
+  color:#c61e79;
+}
+.privatePublicToggleTab li a{
+  text-decoration: none;
+  color: #666;
+  font-weight: 700;
+  display: block;
+  cursor: pointer;
+}
+.privatePublicToggleTab li a:hover{
+  opacity:0.6;
+}
+.privatePublicToggleTab {
+    max-width: 500px;
+    margin: 0 auto;
+    padding-bottom: 8px;
+}
+.privatePublicToggleTab ul {
+    clear: both;
+    overflow: hidden;
+}
+.privatePublicToggleTab li.active {
+    border-bottom-color: #c61e79;
+}
+.privatePublicToggleTab li {
+    background: #fff;
+    width: 33%;
+    float: left;
+    line-height: 30px;
+    text-align: center;
+    color: #c61e79;
+    height: 30px;
+    list-style: none;
+    border-bottom: solid 3px #f6f6f6;
+    -webkit-backface-visibility: hidden;
+    transition: opacity .1s;
+}
 </style>
+
+{% endblock %}
 
 {# <link href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" rel="stylesheet"> #}
 
+{% block main %}
+
+{% include "Block/header.twig" %}
+{% include "Block/logo.twig" %}
+{% include "Block/category_nav_pc.twig" %}
 
     <div class="ec-layoutRole__main">
         <div class="ec-mypageRole">
             <div class="ec-pageHeader">
                 <h1>{{ Customer.name01 }}{{ Customer.name02 }}さんのお気に入り一覧</h1>
             </div>
+            {% if auth %}
             {% include 'Mypage/navi.twig' %}
+            {% endif %}
+        </div>
+        <div class="privatePublicToggleTab">
+            <ul>
+                <li class="left-filter"><a href="{{ url('mypage_favorite') }}">private</a></li>
+                <li class="right-filter active"><a href="{{ url('favorite_share', { user_id : Customer.id }) }}">public</a></li>
+            </ul>
         </div>
         {% if auth  %}
         <div class="form-wrapper">
@@ -162,36 +215,38 @@
                         </ul>
                     </div>
                     <div class="ec-pagerRole">
-                        {% include "pager.twig" with {'pages': pagination.paginationData} %}
+                        {% include "gift_pager.twig" with {'pages': pagination.paginationData} %}
                     </div>
                 {% else %}
                     <div class="ec-favoriteRole__header">{{ 'front.mypage.favorite_not_found'|trans }}</div>
                 {% endif %}
 
 
-                <div class="gift_take_history">
-                {% if pagination2.totalItemCount > 0 %}
-                <h2> 受け取ったギフト</h2>
-                    {% for items in pagination2 %}
-                    <div class="take_gift_wrapper">
-                        <div class="take_history_name">
-                        <p>{{ items.sender_name }}</p>
-                        </div>
-                        <div class="baloon">
-                            <div class="balloon2-left">
-                            <p>{{ items.comment }}</p>
+                {% if auth %}
+                    <div class="gift_take_history">
+                    {% if pagination2.totalItemCount > 0 %}
+                    <h2> 受け取ったギフト</h2>
+                        {% for items in pagination2 %}
+                        <div class="take_gift_wrapper">
+                            <div class="take_history_name">
+                            <p>{{ items.sender_name }}</p>
+                            </div>
+                            <div class="baloon">
+                                <div class="balloon2-left">
+                                <p>{{ items.comment }}</p>
+                                </div>
+                            </div>
+                            <div class="take_history_item_name">
+                            {{ items.name }}
                             </div>
                         </div>
-                        <div class="take_history_item_name">
-                        {{ items.name }}
-                        </div>
-                    </div>
-                    {% endfor %}
+                        {% endfor %}
 
-                    {# <div class="ec-pagerRole">
-                        {% include "pager.twig" with {'pages': pagination2.paginationData} %}
-                    </div> #}
+                        {# <div class="ec-pagerRole">
+                            {% include "pager.twig" with {'pages': pagination2.paginationData} %}
+                        </div> #}
 
+                    {% endif %}
                 {% endif %}
                 </div>
 
