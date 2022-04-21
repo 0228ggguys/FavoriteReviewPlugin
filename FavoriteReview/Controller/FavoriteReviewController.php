@@ -162,16 +162,17 @@ class FavoriteReviewController extends AbstractController
         $pagination = $paginator->paginate(
             $qb,
             $request->get('pageno', 1),
-            // $this->eccubeConfig['eccube_search_pmax'],
-            10,
+            $this->eccubeConfig['eccube_search_pmax'],
+            // 10,
             ['wrap-queries' => true]
         );
-// dump($pagination);
-// exit;
+
+        $openCount = $this->customerFavoriteProductRepository->getOpenCount($Customer);
 
         return [
             'pagination' => $pagination,
             'Customer' => $Customer,
+            'openCount' => $openCount,
         ];
 
     }
@@ -374,8 +375,8 @@ class FavoriteReviewController extends AbstractController
         $pagination = $paginator->paginate(
             $qb,
             $request->get('pageno', 1),
-            $this->eccubeConfig['eccube_search_pmax'], //この３つ目の引数が商品数を超えると（２ページ目が必要な状況になると）エラーが出る
-            // 10,
+            // $this->eccubeConfig['eccube_search_pmax'], //この３つ目の引数が商品数を超えると（２ページ目が必要な状況になると）エラーが出る
+            12,
             ['wrap-queries' => true]
         );
         // $pagination->appends(Input::all());
@@ -458,7 +459,7 @@ class FavoriteReviewController extends AbstractController
             'form' => $form->createView(),
             'auth' => $auth,
             'canGift' => $canGift,
-            'qb2' => $qb2
+            // 'qb2' => $qb2
         ];
 
     }

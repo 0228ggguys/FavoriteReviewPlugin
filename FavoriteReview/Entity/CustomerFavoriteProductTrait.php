@@ -26,9 +26,9 @@ trait CustomerFavoriteProductTrait
     private $priority;
 
     /**
-     * @var boolean
+     * @var boolean|null
      *
-     * @ORM\Column(name="open", type="boolean", options={"default":false})
+     * @ORM\Column(name="open", type="boolean", options={"default":false}, nullable=true)
      */
     private $open;
 
