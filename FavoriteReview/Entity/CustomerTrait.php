@@ -26,6 +26,14 @@ trait CustomerTrait
     private $gift;
 
     /**
+     * @var string|null
+     *
+     * @ORM\Column(name="url", type="string", length=255, nullable=true)
+     */
+    private $url;
+
+
+    /**
      * Set share.
      *
      * @param boolean $share
@@ -73,4 +81,27 @@ trait CustomerTrait
         return $this->gift;
     }
 
+    /**
+     * Set url.
+     *
+     * @param string $url
+     *
+     * @return Customer
+     */
+    public function setUrl($url)
+    {
+        $this->url = $url;
+
+        return $this;
+    }
+
+    /**
+     * Get url.
+     *
+     * @return string
+     */
+    public function getUrl()
+    {
+        return $this->url;
+    }
 }
