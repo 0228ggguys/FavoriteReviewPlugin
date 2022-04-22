@@ -153,19 +153,14 @@
             {% include 'Mypage/navi.twig' %}
             {% endif %}
         </div>
-        <div class="privatePublicToggleTab">
-            <ul>
-                <li class="left-filter"><a href="{{ url('mypage_favorite') }}">private</a></li>
-                <li class="right-filter active"><a href="{{ url('favorite_share', { user_id : Customer.id }) }}">public</a></li>
-            </ul>
-        </div>
+
         {% if auth  %}
         <div class="form-wrapper">
         <h4>ページを公開する</h4>
             <div class="favorite-share-form">
                 {{ form_start(form) }}
                 {{ form_widget(form) }}
-                <input type="submit" action="{{ url('favorite_share', { user_id : Customer.id }) }}" method="POST">
+                <input type="submit" action="{{ url('favorite_share', { user_url : user_url }) }}" method="POST">
 
                 {{ form_end(form) }}
             </div>
