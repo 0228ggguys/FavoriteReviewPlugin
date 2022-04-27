@@ -123,6 +123,12 @@ a.btn--sns:hover {
 /* .ec-favoriteRole__header{
   display:block;
 } */
+.lock-item{
+    display:inline-block;
+}
+.lock-item.active2{
+    display:none;
+}
 </style>
 {% endblock %}
 
@@ -151,21 +157,37 @@ $(function(){
 
 $(function() {
   $('.tab-item').click(function() {
-
     //現在activeが付いているクラスからactiveを外す
     $('.active').removeClass('active');
-
     //クリックされたタブメニューにactiveクラスを付与。
     $(this).addClass('active');
-
     //一旦showクラスを外す
     $('.show').removeClass('show');
-
     //クリックしたタブのインデックス番号取得
     const index = $(this).index();
-
     //タブのインデックス番号と同じコンテンツにshowクラスをつけて表示する
     $('.tab-content').eq(index).addClass('show');
+  });
+});
+
+$(function() {
+  $('.lock-item').click(function() {
+    let $this = $(this); //this=イベントの発火した要素＝iタグを代入
+    no = $this.data('no'); //iタグに仕込んだdata-idの値を得る
+    $.ajax({
+            method: "POST",
+            url: "/mypage/lock/status",
+            data: {'no' : no},
+            })
+            .done(function(data){
+            //現在activeが付いているクラスからactiveを外す
+            $('.active2').removeClass('active2');
+            //クリックされたタブメニューにactiveクラスを付与。
+            $this.addClass('active2');
+            console.log('success!');
+            }).fail(function(){
+            console.log('fail!!')
+        });
   });
 });
 </script>
@@ -259,7 +281,27 @@ $(function() {
                 <div class="ec-favoriteRole">
                     {% if pagination.totalItemCount > 0 %}
                         <div class="ec-favoriteRole__header">
+                            <div class="lock">
+                            {% if share %}
+                            <div class="lock-item">
                             <p>{{ openCount }}件を公開しています</p>
+                                <i class="fas fa-lock-open" data-no=1></i>
+                            </div>
+                            <div class="lock-item active2">
+                            <p>{{ openCount }}件を公開できます</p>
+                                <i class="fas fa-lock" data-no=0></i>
+                            </div>
+                            {% else %}
+                            <div class="lock-item active2">
+                            <p>{{ openCount }}件を公開しています</p>
+                                <i class="fas fa-lock-open" data-no=1></i>
+                            </div>
+                            <div class="lock-item">
+                            <p>{{ openCount }}件を公開できます</p>
+                                <i class="fas fa-lock" data-no=0></i>
+                            </div>
+                            {% endif %}
+                            </div>
                         </div>
                         <div class="ec-favoriteRole__detail">
                             <ul class="ec-favoriteRole__itemList">

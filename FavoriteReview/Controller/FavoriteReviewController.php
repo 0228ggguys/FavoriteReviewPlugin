@@ -168,11 +168,13 @@ class FavoriteReviewController extends AbstractController
         );
 
         $openCount = $this->customerFavoriteProductRepository->getOpenCount($Customer);
+        $share = $this->customerRepository->find($Customer)->getShare();
 
         return [
             'pagination' => $pagination,
             'Customer' => $Customer,
             'openCount' => $openCount,
+            'share' => $share,
         ];
 
     }
@@ -210,6 +212,37 @@ class FavoriteReviewController extends AbstractController
         ]);
     }
 
+    /**
+     * ajax処理で'open'カラムを変えたいidを持ってくる
+     *
+     * @Route("/mypage/lock/status", name="change_lock_status", methods={"POST"})
+     * @param $request
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     */
+    public function changeLockStatus(Request $request)
+    {
+        if (!$request->isXmlHttpRequest()) {
+            throw new BadRequestHttpException();
+        }
+
+        $no = $request->get('no');
+        $Customer = $this->getUser();
+
+        $c = $this->customerRepository->find($Customer);
+        if($no == 0){
+            $c->setShare(1);
+        }else{
+            $c->setShare(0);
+        }
+
+        $em = $this->getDoctrine()->getManager();
+        $em->persist($c);
+        $em->flush();
+
+        return $this->json([
+            'success' => true
+        ]);
+    }
 
 
     /**
