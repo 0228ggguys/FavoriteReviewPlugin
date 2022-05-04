@@ -170,11 +170,19 @@ class FavoriteReviewController extends AbstractController
         $openCount = $this->customerFavoriteProductRepository->getOpenCount($Customer);
         $share = $this->customerRepository->find($Customer)->getShare();
 
+        $user_url = $this->customerRepository->find($Customer)->geturl();
+
+
+        $twitter_share_url = 'https://twitter.com/intent/tweet?url=http://localhost:8091/favorite_share/'.$user_url.'&text=お気に入りリストです！';
+        $facebook_share_url = 'https://www.facebook.com/sharer.php?src=bm&u=http://localhost:8091/favorite_share/'.$user_url.'&t=お気に入りリストです！';
+
         return [
             'pagination' => $pagination,
             'Customer' => $Customer,
             'openCount' => $openCount,
             'share' => $share,
+            'twitter_share_url' => $twitter_share_url,
+            'facebook_share_url' => $facebook_share_url,
         ];
 
     }
@@ -225,14 +233,14 @@ class FavoriteReviewController extends AbstractController
             throw new BadRequestHttpException();
         }
 
-        $no = $request->get('no');
+        $shareNo = $request->get('no');
         $Customer = $this->getUser();
 
         $c = $this->customerRepository->find($Customer);
-        if($no == 0){
-            $c->setShare(1);
-        }else{
+        if($shareNo == 1){
             $c->setShare(0);
+        }else{
+            $c->setShare(1);
         }
 
         $em = $this->getDoctrine()->getManager();
@@ -240,7 +248,8 @@ class FavoriteReviewController extends AbstractController
         $em->flush();
 
         return $this->json([
-            'success' => true
+            'success' => true,
+            'shareNo' => $shareNo
         ]);
     }
 

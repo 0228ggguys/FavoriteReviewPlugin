@@ -76,6 +76,9 @@ a.btn--sns:hover {
   margin: 0 auto;
   text-align:center;
 }
+.tab-menu{
+    width:100%;
+}
 .tab-menu li.active{
   color:#c61e79;
 }
@@ -103,7 +106,7 @@ a.btn--sns:hover {
 }
 .tab-menu li {
     background: #fff;
-    width: 33%;
+    width: 50%;
     float: left;
     line-height: 30px;
     text-align: center;
@@ -125,9 +128,21 @@ a.btn--sns:hover {
 } */
 .lock-item{
     display:inline-block;
+    width:100%;
 }
-.lock-item.active2{
+.lock-item.hidden{
     display:none;
+}
+.lock-item p{
+    display:inline;
+    /* text-align:right; */
+}
+.lock-item-i:hover{
+    cursor:pointer;
+}
+.sns{
+    display:inline;
+    float:right;
 }
 </style>
 {% endblock %}
@@ -171,20 +186,23 @@ $(function() {
 });
 
 $(function() {
-  $('.lock-item').click(function() {
+  let item = $('.lock-item-i');
+  let shareNo;
+  item.on('click',function(){
     let $this = $(this); //this=イベントの発火した要素＝iタグを代入
-    no = $this.data('no'); //iタグに仕込んだdata-idの値を得る
+    shareNo = $this.data('no'); //iタグに仕込んだdata-idの値を得る
     $.ajax({
             method: "POST",
             url: "/mypage/lock/status",
-            data: {'no' : no},
+            data: {'no' : shareNo},
             })
             .done(function(data){
             //現在activeが付いているクラスからactiveを外す
-            $('.active2').removeClass('active2');
+            $('.hidden').removeClass('hidden');
             //クリックされたタブメニューにactiveクラスを付与。
-            $this.addClass('active2');
+            $this.closest('div').addClass('hidden');
             console.log('success!');
+            console.log(data);
             }).fail(function(){
             console.log('fail!!')
         });
@@ -284,21 +302,29 @@ $(function() {
                             <div class="lock">
                             {% if share %}
                             <div class="lock-item">
-                            <p>{{ openCount }}件を公開しています</p>
-                                <i class="fas fa-lock-open" data-no=1></i>
+                                <p>{{ openCount }}件を公開しています１</p>
+                                <i class="lock-item-i fas fa-lock-open" data-no="1"></i>
+                                <div class="sns">
+                                <a href="{{twitter_share_url}}"><i class="fab fa-twitter fa-lg"></i></a>
+                                <a href="{{facebook_share_url}}"><i class="fab fa-facebook fa-lg"></i></a>
+                                </div>
                             </div>
-                            <div class="lock-item active2">
-                            <p>{{ openCount }}件を公開できます</p>
-                                <i class="fas fa-lock" data-no=0></i>
+                            <div class="lock-item hidden">
+                                <p>{{ openCount }}件を公開できます２</p>
+                                <i class="lock-item-i fas fa-lock" data-no="0"></i>
                             </div>
                             {% else %}
-                            <div class="lock-item active2">
-                            <p>{{ openCount }}件を公開しています</p>
-                                <i class="fas fa-lock-open" data-no=1></i>
+                            <div class="lock-item hidden">
+                                <p>{{ openCount }}件を公開しています３</p>
+                                <i class="lock-item-i fas fa-lock-open" data-no="1"></i>
+                                <div class="sns">
+                                <a href="{{twitter_share_url}}"><i class="fab fa-twitter fa-lg"></i></a>
+                                <a href="{{facebook_share_url}}"><i class="fab fa-facebook fa-lg"></i></a>
+                                </div>
                             </div>
                             <div class="lock-item">
-                            <p>{{ openCount }}件を公開できます</p>
-                                <i class="fas fa-lock" data-no=0></i>
+                                <p>{{ openCount }}件を公開できます４</p>
+                                <i class="lock-item-i fas fa-lock" data-no="0"></i>
                             </div>
                             {% endif %}
                             </div>
